@@ -107,7 +107,7 @@ module Spree
     private
 
     def name_with_suffix(name)
-      name.end_with?(suffix) ? name : [name, suffix].join
+     adapter.name_with_suffix(name, suffix)
     end
 
     def listener_names

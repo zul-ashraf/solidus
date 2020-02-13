@@ -4,6 +4,8 @@ module Spree
   module Event
     module Adapters
       module ActiveSupportNotifications
+        class InvalidEventNameType < StandardError; end
+
         extend self
 
         def fire(event_name, opts)
@@ -27,6 +29,17 @@ module Spree
           names.each_with_object({}) do |name, memo|
             listeners = ActiveSupport::Notifications.notifier.listeners_for(name)
             memo[name] = listeners if listeners.present?
+          end
+        end
+
+        def name_with_suffix(name, suffix)
+          case name
+          when String
+            name.end_with?(suffix) ? name : [name, suffix].join
+          when Regexp
+            Regexp.new("#{name}#{Regexp.escape(suffix)}$")
+          else
+            raise InvalidEventNameType, "Invalid event name type: #{name.class}"
           end
         end
       end
