@@ -119,6 +119,8 @@ RSpec.describe Spree::Event do
       allow(subscriber_name).to receive(:to_s).and_return(subscriber_name)
     end
 
+    after { described_class.subscribers.clear }
+
     it 'accepts the names of constants' do
       Spree::Config.events.subscribers << subscriber_name
 
@@ -131,6 +133,28 @@ RSpec.describe Spree::Event do
       described_class.subscribers << subscriber_name
 
       expect(described_class.subscribers.to_a).to eq([subscriber])
+    end
+  end
+
+  describe '.require_subscriber_files' do
+    let(:susbcribers_dir) { Rails.root.join("app", "subscribers", "spree") }
+
+    def create_foo_subscriber_file
+      FileUtils.mkdir_p(susbcribers_dir)
+      File.open File.join(susbcribers_dir, 'foo_subscriber.rb'), 'w' do |f|
+        f.puts "module Spree::FooSubscriber; include Spree::Event::Subscriber; end"
+      end
+    end
+
+    before { create_foo_subscriber_file }
+    after { FileUtils.rm_rf(susbcribers_dir) }
+
+    it 'requires subscriber files and loads them into Spree::Event.subscribers' do
+      expect do
+        described_class.require_subscriber_files
+      end.to change { described_class.subscribers.count }.by 1
+
+      expect(described_class.subscribers).to include Spree::FooSubscriber
     end
   end
 end
