@@ -94,10 +94,15 @@ method allows to map a method of the subscriber module to an event that
 happens in the system. If the `event_name` argument is not specified,
 the event name and the method name should match.
 
-These subscribers modules are loaded with the rest of your application but
-you need to manually subscribe to them.
+These subscriber modules are loaded with the rest of your application, you
+don't need to manually subscribe them when:
 
-For example, you could subscribe to them programmatically with something like:
+* you put them in the directory (or any subdirectory of) `app/subscribers`
+* their filename ends with `_subscriber.rb`
+
+On the other hand, if you need to resort to manual subscription because you did
+not follow the naming convetion explained above, you can use an initializer
+in order to subscribe your subscribers, for example with something similar to:
 
 ```ruby
 if defined?(SmsLibrary)
